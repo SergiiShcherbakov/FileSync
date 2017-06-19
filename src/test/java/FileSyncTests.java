@@ -30,6 +30,7 @@ public class FileSyncTests {
         Files.createFile(sours );
     }
 
+
     @Test
     public void TestWithoutDestDir() throws IOException {
         //given
