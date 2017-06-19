@@ -30,13 +30,10 @@ import java.nio.file.attribute.BasicFileAttributes;
  */
 public class FileSync {
     public static void main(String[] args) {
-        if(args[1] == null ) throw new RuntimeException("dest adress ");
+        if(args[1] == null || args.length < 2 ) throw new RuntimeException("dest path did not input");
+        if(args[0] == null || args.length < 1 ) throw new RuntimeException("sours path did not input");
         final Path sours = Paths.get( args[0]);
         final Path dest = Paths.get( args[1]);
-//        final Path sours = Paths.get( "H:\\Juja\\projects\\synch\\Test\\Test1");
-//        final Path dest = Paths.get( "H:\\Juja\\projects\\synch\\Test\\Test2");
-        //"H:\\Juja\\projects\\synch\\Test\\Test1 H:\\Juja\\projects\\synch\\Test\\Test2" sours ;
-        //"H:\\Juja\\projects\\synch\\Test\\Test2" dest ;
 
         try {
             Files.walkFileTree(sours,  new SimpleFileVisitor(){
@@ -64,6 +61,7 @@ public class FileSync {
                     return FileVisitResult.CONTINUE;
                 }
             });
+
             Files.walkFileTree(dest, new SimpleFileVisitor(){
                 @Override
                 public FileVisitResult preVisitDirectory(Object dir, BasicFileAttributes attrs) throws IOException {

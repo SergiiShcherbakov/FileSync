@@ -1,13 +1,14 @@
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -46,6 +47,11 @@ public class FileSyncTests {
         assertTrue( Files.exists(dest ));
         dest = Paths.get(destDir + "\\test1");
         assertTrue( Files.exists(dest ));
+
+        File file = new File(destDir);
+        assertEquals(2, file.listFiles().length);
+        file = new File(destDir + "\\test2");
+        assertEquals(1, file.listFiles().length);
     }
 
 
