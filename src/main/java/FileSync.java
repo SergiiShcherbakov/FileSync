@@ -30,8 +30,12 @@ import java.nio.file.attribute.BasicFileAttributes;
  */
 public class FileSync {
     public static void main(String[] args) {
-        if(args[1] == null || args.length < 2 ) throw new RuntimeException("dest path did not input");
-        if(args[0] == null || args.length < 1 ) throw new RuntimeException("sours path did not input");
+        if( args.length < 2 || args[1] == null ) {
+            throw new NullPointerException("dest path did not input");
+        }
+        if( args.length < 1 || args[0] == null  ) {
+            throw new NullPointerException("sours path did not input");
+        }
         final Path sours = Paths.get( args[0]);
         final Path dest = Paths.get( args[1]);
 
