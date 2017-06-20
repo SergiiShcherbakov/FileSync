@@ -19,8 +19,8 @@ public class FileSyncTests {
     public static final String TEST_DIR_1 = "\\test1";
     public static final String TEST_DIR_2 = "\\test2";
     public static final String TEST_FILE_1 = "\\test2\\test.txt";
-    String soursDir = "H:\\Juja\\projects\\synch\\Test\\Test3";
-    String destDir = "H:\\Juja\\projects\\synch\\Test\\Test4";
+    String soursDir = "D:\\Test1";
+    String destDir = "D:\\Test2";
 
     @Before
     public void setData() throws IOException {
@@ -151,6 +151,5 @@ public class FileSyncTests {
         dest = Paths.get(destDir );
         Files.deleteIfExists(dest );
     }
-
 
 }

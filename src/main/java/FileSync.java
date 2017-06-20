@@ -28,73 +28,82 @@ import java.nio.file.attribute.BasicFileAttributes;
  *          соответствующие правки в собственный код. Мы не гарантируем разбор решение каждого учасника,
  *          оно может быть сделаным выборочно.
  */
+
 public class FileSync {
-    public static void main(String[] args) {
+    final Path sours;
+    final Path dest;
+
+    private FileSync(String[] args) {
         if( args.length < 2 || args[1] == null ) {
             throw new NullPointerException("dest path did not input");
         }
         if( args.length < 1 || args[0] == null  ) {
             throw new NullPointerException("sours path did not input");
         }
-        final Path sours = Paths.get( args[0]);
-        final Path dest = Paths.get( args[1]);
+        sours = Paths.get( args[0]);
+        dest = Paths.get( args[1]);
+    }
 
+    public static void main(String[] args) {
+        (new FileSync(args)).start();
+    }
+
+    private void start() {
         try {
-            Files.walkFileTree(sours,  new SimpleFileVisitor(){
-                @Override
-                public FileVisitResult preVisitDirectory(Object dir, BasicFileAttributes attrs) throws IOException {
-                    return copyIfDifferent(dir);
-                }
-                @Override
-                public FileVisitResult visitFile(Object file, BasicFileAttributes attrs) throws IOException {
-                    return copyIfDifferent(file );
-                }
-
-                public FileVisitResult copyIfDifferent(Object path ){
-                    Path soursFile = (Path) path;
-                    Path newPath = dest.resolve(sours.relativize(soursFile));
-                    try {
-                        if (Files.exists(newPath) && ( Files.size(newPath) == Files.size(soursFile) || Files.isDirectory(newPath) )) {
-                            return FileVisitResult.CONTINUE;
-                        } else {
-                            Files.copy(soursFile, newPath, StandardCopyOption.REPLACE_EXISTING);
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    return FileVisitResult.CONTINUE;
-                }
-            });
-
-            Files.walkFileTree(dest, new SimpleFileVisitor(){
-                @Override
-                public FileVisitResult preVisitDirectory(Object dir, BasicFileAttributes attrs) throws IOException {
-                    return removeInDestDeletedInSours(dir);
-                }
-
-                @Override
-                public FileVisitResult visitFile(Object file, BasicFileAttributes attrs) throws IOException {
-                    return removeInDestDeletedInSours(file );
-                }
-
-                public FileVisitResult removeInDestDeletedInSours(Object path ){
-                    Path detectedDestPath = (Path) path;
-                    Path detectedSoursPath = sours.resolve(dest.relativize(detectedDestPath));
-                    if (Files.exists( detectedSoursPath)  ) {
-                        return FileVisitResult.CONTINUE;
-                    } else {
-                        try {
-                            Files.delete(detectedDestPath);
-                            System.out.println(detectedDestPath + "was delete");
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    return FileVisitResult.CONTINUE;
-                }
-            });
+            AddAllFilesToDest(sours, dest);
+            CleanFilesInDest(sours, dest);
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void CleanFilesInDest(Path sours, Path dest) throws IOException {
+        Files.walkFileTree(dest, new SimpleFileVisitor(){
+            @Override
+            public FileVisitResult preVisitDirectory(Object dir, BasicFileAttributes attrs) throws IOException {
+                return removeInDestDeletedInSours(dir);
+            }
+
+            @Override
+            public FileVisitResult visitFile(Object file, BasicFileAttributes attrs) throws IOException {
+                return removeInDestDeletedInSours(file );
+            }
+        });
+    }
+    private FileVisitResult removeInDestDeletedInSours(Object path ) throws IOException {
+        Path detectedDestPath = (Path) path;
+        Path detectedSoursPath = sours.resolve(dest.relativize(detectedDestPath));
+        if (Files.exists( detectedSoursPath)  ) {
+            return FileVisitResult.CONTINUE;
+        } else {
+            Files.delete(detectedDestPath);
+            System.out.println(detectedDestPath + "was delete");
+        }
+        return FileVisitResult.CONTINUE;
+    }
+
+    private  void AddAllFilesToDest(Path sours, Path dest) throws IOException {
+        Files.walkFileTree(sours,  new SimpleFileVisitor(){
+            @Override
+            public FileVisitResult preVisitDirectory(Object dir, BasicFileAttributes attrs) throws IOException {
+                return copyIfDifferent(dir);
+            }
+            @Override
+            public FileVisitResult visitFile(Object file, BasicFileAttributes attrs) throws IOException {
+                return copyIfDifferent(file );
+            }
+
+        });
+    }
+
+    private FileVisitResult copyIfDifferent(Object path ) throws IOException {
+        Path soursFile = (Path) path;
+        Path newPath = dest.resolve(sours.relativize(soursFile));
+        if (Files.exists(newPath) && ( Files.size(newPath) == Files.size(soursFile) || Files.isDirectory(newPath) )) {
+            return FileVisitResult.CONTINUE;
+        } else {
+            Files.copy(soursFile, newPath, StandardCopyOption.REPLACE_EXISTING);
+        }
+        return FileVisitResult.CONTINUE;
     }
 }
